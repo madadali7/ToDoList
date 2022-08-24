@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body>
+  <div class="wrapper">
+    <header>Todo App</header>
+    <div class="inputField">
+      <input type="text" placeholder="Add your Items" id="FirstWord">
+      <button onclick="allData()" id="btnIcon"></button>
+    </div>
+    <ul class="todoList" id="ul7">
+        
+        </ul>
+    <div class="footer">
+      
+      <button onclick="deleteAll()" id="dltBtn"><b>Clear All</b></button>
+    </div>
+  </div>
+
+  <script>
+
+
+
+window.onload = function(){
+display();
+}
+
+
+
+
+function allData(){
+    debugger;
+    if(isEdit){
+
+      editObj.firstWord = document.getElementById("FirstWord").value;
+
+      let ajax = new XMLHttpRequest();
+  ajax.open("PUT","http://localhost:3000/data/"+editObj.id);
+  ajax.setRequestHeader("content-type","application/json");
+  ajax.onprogress = function(){};
+  ajax.onload = function(){
+    data = JSON.parse(this.response);
+    document.getElementById("FirstWord").value = "";
+    display()
+  }
+  ajax.send(JSON.stringify(editObj));
+
+    }else{
+      let stdFirstWord = document.getElementById("FirstWord").value;
+
+
+
+      editObj = {
+
+
+firstWord : stdFirstWord
+}
+
+let ajax = new XMLHttpRequest();
+ajax.open("POST","http://localhost:3000/data");
+ajax.setRequestHeader("content-type","application/json");
+ajax.onprogress = function(){};
+ajax.onload = function(){
+    let d = JSON.parse(this.response);
+display();
+}
+
+ajax.send(JSON.stringify(editObj));
+
+  document.getElementById("FirstWord").value = "";
+
+}
+var icon = `<i id="add" class="fas fa-plus" title="Add Items"></i>`;
+    document.getElementById("btnIcon").innerHTML = icon
+    }
+
+
+    var data = [];
+
+function display(){
+debugger
+    var info = "";
+
+    let ajax = new XMLHttpRequest();
+    ajax.open("GET","http://localhost:3000/data");
+    ajax.setRequestHeader("content-type","application/json");
+    ajax.onprogress = function(){};
+    ajax.onload = function(){
+        data = JSON.parse(this.response)
+
+        for(i=0; i<data.length; i++){
+            info = info + `
+            <ul>
+            
+            <li style="${data[i].completed ? 'background-color:green':'background-color:white' }"><b> ${data[i].firstWord}<span class="delete"><i class="fas fa-trash" onclick="deleteFunction(${data[i].id});"></i></span>
+              <label><span class="edit"><i class="fas fa-edit" onclick="editFunction(${data[i].id});"></i></span></label>
+              <label><span class="check"><i id="checkId" class="fas fa-check" onclick="checkFunction(${data[i].id});"></i></span></label>
+              </li>    
+             
+            </ul
+            
+            `
+        }
+
+        document.getElementById("ul7").innerHTML = info;
+
+    }
+
+    ajax.send();
+    var icon = `<i id="add" class="fas fa-plus" title="Add Items"></i>`;
+    document.getElementById("btnIcon").innerHTML = icon;
+
+}
+
+
+
+function deleteFunction(id){
+
+    let ajax = new XMLHttpRequest();
+    ajax.open("DELETE","http://localhost:3000/data/"+id);
+    ajax.setRequestHeader("content-type","application/json");
+    ajax.onprogress = function (){};
+    ajax.onload = function (){
+        let data = JSON.parse(this.response);
+        display();
+    };
+    ajax.send();
+
+    
+}
+
+var isEdit=false;
+var editObj;
+
+function editFunction(id){
+debugger
+  isEdit=true;
+  editObj = data.find(a=> a.id == id);
+
+  document.getElementById("FirstWord").value = editObj.firstWord;
+
+  var icon = `<i id="add" class="fas fa-edit" title="Edit Items"></i>`;
+    document.getElementById("btnIcon").innerHTML = icon
+
+}
+
+function deleteAll(){
+  debugger;
+
+  for(let i=0; i<data.length; i++){
+
+  let ajax = new XMLHttpRequest();
+  ajax.open("DELETE","http://localhost:3000/data/"+data[i].id);
+  ajax.setRequestHeader("content-type","application/json");
+  ajax.onprogress = function(){};
+  ajax.onload = function(){
+
+    let d = JSON.parse(this.response);    
+    display();
+  }
+  ajax.send();
+  }
+
+}
+
+function checkFunction(id){
+  editObj = data.find(a=> a.id == id)
+
+  if(editObj.completed){
+    editObj.completed =false;
+
+  let ajax = new XMLHttpRequest();
+  ajax.open("PUT","http://localhost:3000/data/"+id);
+  ajax.setRequestHeader("content-type","application/json");
+  ajax.onprogress = function(){};
+  ajax.onload = function(){
+
+    let z = JSON.parse(this.response)
+    display();
+  };
+  ajax.send(JSON.stringify(editObj));
+
+
+
+  }else{
+     editObj.completed =true;
+
+  let ajax = new XMLHttpRequest();
+  ajax.open("PUT","http://localhost:3000/data/"+id);
+  ajax.setRequestHeader("content-type","application/json");
+  ajax.onprogress = function(){};
+  ajax.onload = function(){
+
+    let z = JSON.parse(this.response)
+    display();
+  };
+  ajax.send(JSON.stringify(editObj));
+
+  
+
+  }
+  
+}
+
+
+
+
+
+
+
+  </script>
+
+</body>
+</html>
